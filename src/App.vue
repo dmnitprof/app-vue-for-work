@@ -1,30 +1,93 @@
 <template>
-  <div id="nav">
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
+  <div class="app">
+    <div class="container-fluid">
+      <component :is="layout">
+        <router-view/>
+      </component>
+      <div class="position-fixed bottom-0 end-0 p-2 m-2 bg-secondary bg-opacity-75" style="z-index: 11"
+           v-if="message"
+      >
+        <div class=" d-flex">
+          <span class="text-break">{{ message }}&nbsp;</span>
+          <button type="button" class="btn-close" aria-label="Close" @click="message = null"></button>
+        </div>
+      </div>
+    </div>
   </div>
-  <router-view/>
 </template>
 
-<style lang="scss">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
+<script>
+import EmptyLayout from './layouts/EmptyLayout'
+import MainLayout from './layouts/MainLayout'
+import messages from './utils/messages'
 
-#nav {
-  padding: 30px;
-
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-
-    &.router-link-exact-active {
-      color: #42b983;
+export default {
+  name: 'App',
+  components: {
+    EmptyLayout,
+    MainLayout
+  },
+  data () {
+    return {
+      message: ''
+    }
+  },
+  mounted () {
+  },
+  methods: {},
+  computed: {
+    error () {
+      return this.$store.getters.error
+    },
+    layout () {
+      return (this.$route.meta.layout || 'empty') + '-layout'
+    },
+    showMessage () {
+      return messages[this.$route.query.message]
+    }
+  },
+  watch: {
+    error (fbError) {
+      this.message = messages[fbError.code] || 'Что-то пошло не так!'
+      setTimeout(() => {
+        this.message = ''
+      }, 3000)
+    },
+    showMessage (msg) {
+      if (msg) {
+        this.message = this.$message(msg)
+        setTimeout(() => {
+          this.message = ''
+        }, 3000)
+      }
     }
   }
+}
+</script>
+
+<style lang="scss">
+.app {
+  text-align: center;
+}
+.invalid {
+  box-shadow: 0 4px 4px brown, 0 4px 8px brown !important;
+  border: 2px solid brown !important;
+}
+.updated {
+  color: mediumseagreen!important;
+}
+.recordText:focus {
+  white-space: nowrap;
+  outline-color: brown;
+  transition: .3s;
+}
+
+.recordText:hover {
+  box-shadow: 0 1px 2px mediumseagreen, 0 2px 2px mediumseagreen;
+  cursor: pointer;
+}
+
+.text-small {
+  font-size: 0.7rem;
 }
 </style>
